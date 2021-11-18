@@ -18,7 +18,9 @@
             <div class="field">
               <span class="subtitle">Number of employees</span>
               <div class="company-field-value">
-                {{ company.numberOfEmployees.toLocaleString("en-US") }}
+                <EmployeeCounterInput
+                  :employeeCount="company.numberOfEmployees"
+                  v-on:countUpdated="updateEmployeeCount"/>
               </div>
             </div>
           </div>
@@ -46,13 +48,24 @@
 
 <script>
 import CompanyService from '../services/CompanyService';
+import EmployeeCounterInput from '../components/EmployeeCounterInput.vue';
+
 export default {
   name: 'ViewCompany',
+  components: {
+    EmployeeCounterInput,
+  },
   data() {
     return {
       company: null,
       companyFailedToLoad: false,
     };
+  },
+  methods: {
+    updateEmployeeCount(newCount) {
+      this.company.numberOfEmployees = newCount;
+      CompanyService.putById(this.company.companyId, { id: this.companyId, ...this.company, numberOfEmployees: newCount });
+    }
   },
   created() {
     const companyIdParam = this.$route.params.companyId;
@@ -86,7 +99,7 @@ export default {
   .company-field-value {
     color: black;
     font-size: 1.25rem;
-    margin: 5px 10px;
+    margin: 15px 10px;
   }
   .subtitle {
     padding: 5px;

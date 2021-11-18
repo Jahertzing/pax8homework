@@ -1,5 +1,6 @@
 <template>
-  <form @submit="submitForm">
+<div>
+  <form @submit="submitForm" v-if="!companyFailedToLoad">
     <div v-if="showAlert">
       <div class="notification is-primary changes-notification">
         <button class="delete" @click="dismissAlert"></button>
@@ -61,6 +62,12 @@
       </div>
     </div>
   </form>
+  <div v-else>
+    <div class="title">
+      Failed to load company
+    </div>
+  </div>
+</div>
 </template>
 
 <script>

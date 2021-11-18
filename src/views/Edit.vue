@@ -5,7 +5,10 @@
         <button class="delete" @click="dismissAlert"></button>
         <span>Success! The following data was updated</span>
         <div class="updates">
-          
+          <p v-if="nameChanged">Name: {{originalForm.name}}</p>
+          <p v-if="domainChanged">Domain: {{originalForm.domain}}</p>
+          <p v-if="numberOfEmployeesChanged">Number of employees: {{originalForm.numberOfEmployees}}</p>
+          <p v-if="subscriptionsPerEmployeeChanged">Number of subscriptions: {{originalForm.subscriptionsPerEmployee}}</p>
         </div>
       </div>
     </div>
@@ -14,13 +17,13 @@
         <div class="card-content">
           <div class="content edit-form">
             <div class="edit-form-title">
-              <h1 class="title">{{ form.name }}</h1>
+              <h1 class="title">{{ companyName }}</h1>
             </div>
             <div class="edit-form-row">
               <div class="field">
                 <label class="label">Company name</label>
                 <div class="control">
-                  <input class="input" type="text" placeholder="Enter company name..." v-model="form.name">
+                  <input class="input" type="text" placeholder="Enter company name..." v-model="form.name" @input="formChanged">
                 </div>
               </div>
             </div>
@@ -28,7 +31,7 @@
               <div class="field">
                 <label class="label">Company domain</label>
                 <div class="control">
-                  <input class="input" type="text" placeholder="Enter company domain..." v-model="form.domain">
+                  <input class="input" type="text" placeholder="Enter company domain..." v-model="form.domain" @input="formChanged">
                 </div>
               </div>
             </div>
@@ -36,7 +39,7 @@
               <div class="field">
                 <label class="label">Number of employees</label>
                 <div class="control">
-                  <input class="input" type="number" placeholder="Enter employee count" v-model="form.numberOfEmployees">
+                  <input class="input" type="number" placeholder="Enter employee count" v-model="form.numberOfEmployees" @input="formChanged">
                 </div>
               </div>
             </div>
@@ -44,12 +47,12 @@
               <div class="field">
                 <label class="label">Subscriptions per employee</label>
                 <div class="control">
-                  <input class="input" type="number" placeholder="Enter subscriptions per employee" v-model="form.subscriptionsPerEmployee">
+                  <input class="input" type="number" placeholder="Enter subscriptions per employee" v-model="form.subscriptionsPerEmployee" @input="formChanged">
                 </div>
               </div>
             </div>
             <div class="edit-form-row">
-              <button class="button" type="submit">
+              <button class="button" type="submit" :disabled="!hasUnsavedChanged">
                 Save
               </button>
             </div>
@@ -68,27 +71,54 @@ export default {
     return {
       companyId: 0,
       companyFailedToLoad: false,
+      originalCompany: null,
       showAlert: false,
+      companyName: '',
       form: {
         name: '',
         domain: '',
         numberOfEmployees: 0,
         subscriptionsPerEmployee: 0,
       },
-      updatedCompany: null,
+      formHasChanged: false,
+      originalForm: null,
+      nameChanged: false,
+      domainChanged: false,
+      numberOfEmployeesChanged: false,
+      subscriptionsPerEmployeeChanged: false,
     };
   },
   methods: {
     submitForm(e) {
       e.preventDefault();
+      this.nameChanged = this.originalForm.name !== this.form.name;
+      this.domainChanged = this.originalForm.domain !== this.form.domain;
+      this.numberOfEmployeesChanged = this.originalForm.numberOfEmployees !== this.form.numberOfEmployees;
+      this.subscriptionsPerEmployeeChanged = this.originalForm.subscriptionsPerEmployee !== this.form.subscriptionsPerEmployee;
       CompanyService.putById(this.companyId, { id: this.companyId, ...this.form })
       .then((data) => {
-        this.updatedCompany = data;
+        this.setCompanyForm(data);
+        this.originalForm = Object.assign({}, this.form);
+        this.formHasChanged = false;
         this.showAlert = true;
       });
     },
     dismissAlert() {
       this.showAlert = false;
+    },
+    formChanged() {
+      this.formHasChanged = true;
+    },
+    setCompanyForm(company) {
+      this.companyName = this.form.name = company.name;
+      this.form.domain = company.domain;
+      this.form.numberOfEmployees = company.numberOfEmployees;
+      this.form.subscriptionsPerEmployee = company.subscriptionsPerEmployee;
+    },
+  },
+  computed: {
+    hasUnsavedChanged() {
+      return this.formHasChanged;
     }
   },
   created() {
@@ -96,10 +126,8 @@ export default {
     this.companyId = parseInt(companyIdParam);
     if (!isNaN(this.companyId)) {
       CompanyService.getById(this.companyId).then((data) => {
-        this.form.name = data.name;
-        this.form.domain = data.domain;
-        this.form.numberOfEmployees = data.numberOfEmployees;
-        this.form.subscriptionsPerEmployee = data.subscriptionsPerEmployee;
+        this.setCompanyForm(data);
+        this.originalForm = Object.assign({}, this.form);
       }).catch(() => {
         this.companyFailedToLoad = true;
       });
@@ -117,6 +145,9 @@ export default {
   }
   .changes-notification {
     margin-bottom: 25px;
+    .updates {
+      margin-top: 5px;
+    }
   }
   .edit-form {
     display: flex;

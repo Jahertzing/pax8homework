@@ -18,6 +18,14 @@ function putById(id, newCompany) {
     return company.id === id;
   });
 
+  if (typeof newCompany.numberOfEmployees === 'string') {
+    newCompany.numberOfEmployees = parseInt(newCompany.numberOfEmployees);
+  }
+
+  if (typeof newCompany.subscriptionsPerEmployee === 'string') {
+    newCompany.subscriptionsPerEmployee = parseInt(newCompany.subscriptionsPerEmployee);
+  }
+
   const putPromise = new Promise((resolve) => {
     fakeCompanies[companyIndex] = newCompany;
     resolve(fakeCompanies[companyIndex]);

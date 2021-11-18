@@ -1,6 +1,7 @@
 export default {
   getAll,
   getById,
+  putById,
 };
 
 function getAll() {
@@ -10,6 +11,13 @@ function getAll() {
 function getById(id) {
   const company = fakeCompanies.find(company => company.id === id);
   return Promise.resolve(company);
+}
+
+function putById(id, newCompany) {
+  const companyIndex = fakeCompanies.findIndex((company) => {
+    return company.id === id;
+  });
+  fakeCompanies[companyIndex] = newCompany;
 }
 
 const fakeCompanies = [

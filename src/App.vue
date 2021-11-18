@@ -7,7 +7,9 @@
         </router-link>
       </div>
     </nav>
-    <router-view />
+    <div class="container">
+      <router-view />
+    </div>
   </div>
 </template>
 

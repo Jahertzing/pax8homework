@@ -17,7 +17,12 @@ function putById(id, newCompany) {
   const companyIndex = fakeCompanies.findIndex((company) => {
     return company.id === id;
   });
-  fakeCompanies[companyIndex] = newCompany;
+
+  const putPromise = new Promise((resolve) => {
+    fakeCompanies[companyIndex] = newCompany;
+    resolve(fakeCompanies[companyIndex]);
+  });
+  return Promise.resolve(putPromise);
 }
 
 const fakeCompanies = [

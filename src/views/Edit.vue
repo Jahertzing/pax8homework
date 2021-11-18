@@ -1,5 +1,14 @@
 <template>
   <form @submit="submitForm">
+    <div v-if="showAlert">
+      <div class="notification is-primary changes-notification">
+        <button class="delete" @click="dismissAlert"></button>
+        <span>Success! The following data was updated</span>
+        <div class="updates">
+          
+        </div>
+      </div>
+    </div>
     <div class="edit-company">
       <div class="card">
         <div class="card-content">
@@ -59,18 +68,27 @@ export default {
     return {
       companyId: 0,
       companyFailedToLoad: false,
+      showAlert: false,
       form: {
         name: '',
         domain: '',
         numberOfEmployees: 0,
         subscriptionsPerEmployee: 0,
-      }
+      },
+      updatedCompany: null,
     };
   },
   methods: {
     submitForm(e) {
       e.preventDefault();
       CompanyService.putById(this.companyId, { id: this.companyId, ...this.form })
+      .then((data) => {
+        this.updatedCompany = data;
+        this.showAlert = true;
+      });
+    },
+    dismissAlert() {
+      this.showAlert = false;
     }
   },
   created() {
@@ -93,9 +111,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .edit-company {
+  .edit-company, .changes-notification {
     max-width: 800px;
     margin: 0 auto;
+  }
+  .changes-notification {
+    margin-bottom: 25px;
   }
   .edit-form {
     display: flex;
